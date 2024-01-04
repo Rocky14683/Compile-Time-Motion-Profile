@@ -1,0 +1,3 @@
+/Users/rockychen/Desktop/ArbitarySCurveProfile/cmake-build-debug/CMakeFiles/ArbitarySCurveProfile.dir
+/Users/rockychen/Desktop/ArbitarySCurveProfile/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/rockychen/Desktop/ArbitarySCurveProfile/cmake-build-debug/CMakeFiles/rebuild_cache.dir
