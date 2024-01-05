@@ -57,12 +57,14 @@ struct SCurveInput {
     }
 
     bool isAMaxReached() const {//return true if reached, false if not reached
-        return (this->constraint.maxVelocity - this->condition.v0) * this->constraint.maxJerk >=
+        int dir = this->condition.dir();
+        return (this->constraint.maxVelocity - dir * this->condition.v0) * this->constraint.maxJerk >=
                this->constraint.maxAcceleration * this->constraint.maxAcceleration;
     }
 
     bool isDMaxReached() const {
-        return (this->constraint.maxVelocity - this->condition.vf) * this->constraint.maxJerk >=
+        int dir = this->condition.dir();
+        return (this->constraint.maxVelocity - dir * this->condition.vf) * this->constraint.maxJerk >=
                this->constraint.maxAcceleration * this->constraint.maxAcceleration;
     }
 
@@ -73,7 +75,7 @@ struct SCurveInput {
         int dir = this->condition.dir();
         if (!isAMaxReached()) {
             time.tj1 = sqrt(
-                    (newIn->constraint.maxVelocity - this->condition.v0) /
+                    (newIn->constraint.maxVelocity - dir * this->condition.v0) /
                     newIn->constraint.maxJerk);
             time.ta = 2. * time.tj1;
         } else {
@@ -84,7 +86,7 @@ struct SCurveInput {
 
         if (!isDMaxReached()) {
             time.tj2 = sqrt(
-                    (newIn->constraint.maxVelocity - this->condition.vf) /
+                    (newIn->constraint.maxVelocity - dir * this->condition.vf) /
                     newIn->constraint.maxJerk);
             time.td = 2. * time.tj2;
         } else {
@@ -135,6 +137,7 @@ struct SCurveInput {
 
     TimeInterval getTimeCase2() {
         TimeInterval time;
+        int dir = this->condition.dir();
         time.tj1 = this->constraint.maxAcceleration / this->constraint.maxJerk;
         time.tj2 = this->constraint.maxAcceleration / this->constraint.maxJerk;
         time.tv = .0;
@@ -142,12 +145,12 @@ struct SCurveInput {
                        + 2.0 * (this->condition.v0 * this->condition.v0 + this->condition.vf * this->condition.vf)
                        + this->constraint.maxAcceleration *
                          (4.0 * this->condition.h() - 2.0 * this->constraint.maxAcceleration / this->constraint.maxJerk
-                                                      * (this->condition.v0 + this->condition.vf));
+                                                      * (dir * this->condition.v0 + dir * this->condition.vf));
         time.ta = (this->constraint.maxAcceleration * this->constraint.maxAcceleration / this->constraint.maxJerk -
-                   2.0 * this->condition.v0
+                   2.0 * dir * this->condition.v0
                    + sqrt(delta)) / (2.0 * this->constraint.maxAcceleration);
         time.td = (this->constraint.maxAcceleration * this->constraint.maxAcceleration / this->constraint.maxJerk -
-                   2.0 * this->condition.vf
+                   2.0 * dir * this->condition.vf
                    + sqrt(delta)) / (2.0 * this->constraint.maxAcceleration);
 
         return time;
@@ -183,7 +186,6 @@ struct SCurveInput {
         }
 
         if (time->td < .0) {
-            time->tj2 = 0;
             time->td = 0;
             time->ta = 2.0 * this->condition.h() / (this->condition.v0 + this->condition.vf);
             time->tj2 = (newIn->constraint.maxJerk * this->condition.h()
@@ -218,12 +220,13 @@ struct SCurveParameters {
     double reachedV;
 
     SCurveParameters(TimeInterval timeInterval, SCurveInput &p) {
+        int dir = p.condition.dir();
         this->timeIntervals = timeInterval;
         this->jMax = p.constraint.maxJerk;
         this->jMin = -p.constraint.maxJerk;
         this->reachedA = p.constraint.maxJerk * timeInterval.tj1;
         this->reachedD = -p.constraint.maxJerk * timeInterval.tj2;
-        this->reachedV = p.condition.dir() * p.condition.v0 + (timeInterval.ta - timeInterval.tj1) * reachedA;
+        this->reachedV = dir * (p.condition.v0 + dir * (timeInterval.ta - timeInterval.tj1) * reachedA);
         this->conditions = p.condition;
     };
 };
@@ -350,11 +353,11 @@ auto SCurveInput::generateAccel(SCurveInput &p) {
 }
 
 Constraints constraint{
-        .maxJerk = 50.0, .maxAcceleration = 30., .maxVelocity = 40.
+        .maxJerk = 50.0, .maxAcceleration = 30., .maxVelocity = 10.
 };
 
 StartAndEndCondition cond{
-        .p0 = .0, .pf = 20., .v0 = 5, .vf = 2
+        .p0 = .0, .pf = -20., .v0 = 5, .vf = -2
 };
 
 SCurveInput Scurve{.constraint = constraint, .condition = cond};
