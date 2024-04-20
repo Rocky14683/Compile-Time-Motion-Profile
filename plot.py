@@ -71,15 +71,15 @@ figure, axis = plt.subplots(2, 2)
 
 axis[0, 0].plot(Stime, Sposition)
 axis[0, 0].set_title("S-Curve Position vs. Time")
-axis[0, 0].axis([0, 4, 0, 25])
+axis[0, 0].axis([0, 6, -5, 60])
 
 axis[0, 1].plot(Stime, Svelocity)
 axis[0, 1].set_title("S-Curve Velocity vs. Time")
-axis[0, 1].axis([-1, 4, -1, 12])
+axis[0, 1].axis([0, 6, -12, 25])
 
 axis[1, 0].plot(Stime, Sacceleration)
 axis[1, 0].set_title("S-Curve Acceleration vs. Time")
-axis[1, 0].axis([-1, 4, -35, 35])
+axis[1, 0].axis([0, 6, -35, 35])
 
 # axis[1, 0].plot(Ntime, Nposition)
 # axis[1, 0].set_title("T-Curve Position vs. Time")
